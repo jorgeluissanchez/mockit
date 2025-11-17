@@ -1,7 +1,7 @@
 {
   "translation": {
     "app": {
-      "title": "iPhone Mockup",
+      "title": "Mockit",
       "subtitle": "Professional Mockup Generator"
     },
     "buttons": {
@@ -17,7 +17,7 @@
       "zoom": "Scroll: zoom"
     },
     "seo": {
-      "title": "iPhone 3D Mockup Creator | Professional Mockup Generator",
+      "title": "Mockit | Professional Mockup Generator",
       "description": "Create professional iPhone 13 Pro mockups in 3D. Upload your image, customize and download in PNG with transparent background. Free tool with React Three Fiber.",
       "keywords": "iPhone mockup, 3D mockup, mockup generator, iPhone 13 Pro, React Three Fiber, mockup creator, PNG transparent, web design, app presentation"
     },

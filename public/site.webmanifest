@@ -1,6 +1,6 @@
 {
-  "name": "iPhone 3D Mockup Creator",
-  "short_name": "iPhone Mockup",
+  "name": "Mockit",
+  "short_name": "Mockit",
   "description": "Crea mockups profesionales del iPhone 13 Pro en 3D",
   "start_url": "/",
   "display": "standalone",

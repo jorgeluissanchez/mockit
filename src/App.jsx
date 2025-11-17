@@ -142,7 +142,7 @@ function App() {
         const url = URL.createObjectURL(blob)
         const link = document.createElement('a')
         link.href = url
-        link.download = `iphone-mockup-${Date.now()}.png`
+        link.download = `mockit-${Date.now()}.png`
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
@@ -154,7 +154,7 @@ function App() {
   return (
     <>
       {/* Main content - 3D Canvas */}
-      <main className="w-full h-full" role="main" aria-label="iPhone 3D Mockup Viewer">
+      <main className="w-full h-full" role="main" aria-label="Mockit - 3D Mockup Viewer">
         <Canvas
           ref={canvasRef}
           camera={{ position: [0, 0, 5], fov: 50 }}
