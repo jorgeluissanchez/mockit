@@ -1,0 +1,30 @@
+{
+  "translation": {
+    "app": {
+      "title": "iPhone Mockup",
+      "subtitle": "Professional Mockup Generator"
+    },
+    "buttons": {
+      "loadImage": "Load Image",
+      "restore": "Restore",
+      "download": "Download PNG",
+      "processing": "Processing..."
+    },
+    "controls": {
+      "title": "Controls:",
+      "rotate": "Click + drag: rotate",
+      "move": "Right click: move",
+      "zoom": "Scroll: zoom"
+    },
+    "seo": {
+      "title": "iPhone 3D Mockup Creator | Professional Mockup Generator",
+      "description": "Create professional iPhone 13 Pro mockups in 3D. Upload your image, customize and download in PNG with transparent background. Free tool with React Three Fiber.",
+      "keywords": "iPhone mockup, 3D mockup, mockup generator, iPhone 13 Pro, React Three Fiber, mockup creator, PNG transparent, web design, app presentation"
+    },
+    "noscript": {
+      "title": "JavaScript Required",
+      "message": "This application requires JavaScript to work. Please enable JavaScript in your browser."
+    }
+  }
+}
+

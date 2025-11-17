@@ -1,0 +1,17 @@
+# robots.txt para iPhone Mockup Creator
+
+# Permitir todos los bots
+User-agent: *
+Allow: /
+
+# Bloquear archivos sensibles
+Disallow: /node_modules/
+Disallow: /*.json$
+Disallow: /src/
+
+# Sitemap
+Sitemap: https://iphone-mockup.vercel.app/sitemap.xml
+
+# Crawl-delay (opcional)
+Crawl-delay: 1
+
