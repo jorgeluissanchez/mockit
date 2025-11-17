@@ -10,7 +10,7 @@ Disallow: /*.json$
 Disallow: /src/
 
 # Sitemap
-Sitemap: https://mockit.vercel.app/sitemap.xml
+Sitemap: https://mockit-zeta.vercel.app/sitemap.xml
 
 # Crawl-delay (opcional)
 Crawl-delay: 1
