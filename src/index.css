@@ -3,16 +3,40 @@
 @tailwind utilities;
 
 @layer base {
+  * {
+    @apply box-border;
+  }
+  
+  html {
+    @apply h-full;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
   body {
-    @apply m-0 overflow-hidden bg-white antialiased;
+    @apply m-0 h-full overflow-hidden bg-white antialiased;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    touch-action: pan-x pan-y;
   }
   
   #root {
-    @apply w-screen h-screen;
+    @apply w-full h-full;
+    position: relative;
+    overflow: hidden;
   }
   
   canvas {
     @apply block;
+    touch-action: none;
+    width: 100% !important;
+    height: 100% !important;
+  }
+  
+  /* Mejorar scroll en móvil */
+  @media (max-width: 768px) {
+    body {
+      -webkit-overflow-scrolling: touch;
+    }
   }
 }
 

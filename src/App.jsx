@@ -1,12 +1,12 @@
 import { Canvas, useLoader } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
-import { Suspense, useState, useRef } from 'react'
+import { Suspense, useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import * as THREE from 'three'
 import { IPhone13ProModel } from './IPhone13Pro'
 
 // Componente para el iPhone con pantalla
-function IPhone({ imageUrl }) {
+function IPhone({ imageUrl, scale = 15 }) {
   // Cargar la textura de la pantalla
   const screenTexture = useLoader(THREE.TextureLoader, imageUrl || '/screenip12.jpg')
   
@@ -19,7 +19,7 @@ function IPhone({ imageUrl }) {
   return (
     <group position={[0, -1, 0]}>
       {/* Modelo del iPhone optimizado con gltfjsx */}
-      <IPhone13ProModel screenTexture={screenTexture} scale={15} />
+      <IPhone13ProModel screenTexture={screenTexture} scale={scale} />
     </group>
   )
 }
@@ -38,7 +38,23 @@ function App() {
   const { t, i18n } = useTranslation()
   const [screenImage, setScreenImage] = useState(null)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
   const canvasRef = useRef(null)
+  
+  // Detectar si es móvil
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+      if (window.innerWidth >= 768) {
+        setIsMobileMenuOpen(false)
+      }
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
   
   // Cambiar idioma
   const changeLanguage = (lng) => {
@@ -151,15 +167,27 @@ function App() {
     }
   }
   
+  // Calcular escala y FOV según el tamaño de pantalla
+  const phoneScale = isMobile ? 12 : 15
+  const cameraFov = isMobile ? 60 : 50
+  const cameraDistance = isMobile ? 4 : 5
+  
   return (
     <>
       {/* Main content - 3D Canvas */}
-      <main className="w-full h-full" role="main" aria-label="Mockit - 3D Mockup Viewer">
+      <main 
+        className={`w-full h-full relative transition-all duration-300 ${
+          !isMobile ? 'pr-56 md:pr-64' : ''
+        }`}
+        role="main" 
+        aria-label="Mockit - 3D Mockup Viewer"
+      >
         <Canvas
           ref={canvasRef}
-          camera={{ position: [0, 0, 5], fov: 50 }}
+          camera={{ position: [0, 0, cameraDistance], fov: cameraFov }}
           gl={{ preserveDrawingBuffer: true, alpha: true }}
-          style={{ background: '#ffffff' }}
+          style={{ background: '#ffffff', width: '100%', height: '100%' }}
+          dpr={Math.min(window.devicePixelRatio, 2)}
         >
           {/* Luces sin reflejos con punto de luz */}
           <ambientLight intensity={5} />
@@ -172,38 +200,92 @@ function App() {
           <OrbitControls
             enableDamping
             dampingFactor={0.05}
-            minDistance={3}
-            maxDistance={10}
+            minDistance={isMobile ? 2.5 : 3}
+            maxDistance={isMobile ? 8 : 10}
             minPolarAngle={Math.PI / 4}
             maxPolarAngle={Math.PI / 1.5}
+            enablePan={!isMobile}
+            touches={{
+              ONE: THREE.TOUCH.ROTATE,
+              TWO: THREE.TOUCH.DOLLY_PAN
+            }}
           />
           
           {/* Modelo del iPhone */}
           <Suspense fallback={<Loader />}>
-            <IPhone imageUrl={screenImage} key={screenImage || 'default'} />
+            <IPhone imageUrl={screenImage} key={screenImage || 'default'} scale={phoneScale} />
           </Suspense>
         </Canvas>
+        
+        {/* Botón de menú móvil */}
+        {isMobile && (
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="fixed top-4 right-4 z-[200] p-3 bg-black text-white rounded-full shadow-lg hover:bg-gray-800 active:scale-95 transition-all"
+            aria-label="Toggle menu"
+            aria-expanded={isMobileMenuOpen}
+          >
+            <svg 
+              className="w-6 h-6" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              {isMobileMenuOpen ? (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
+          </button>
+        )}
       </main>
+      
+      {/* Overlay para móvil */}
+      {isMobile && isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-[140] transition-opacity duration-300"
+          onClick={() => setIsMobileMenuOpen(false)}
+          aria-hidden="true"
+        />
+      )}
       
       {/* Sidebar lateral minimalista y no intrusiva */}
       <aside 
-        className="fixed right-0 top-0 h-full w-56 md:w-64 bg-white border-l-2 border-black z-[100] flex flex-col shadow-[-4px_0_20px_rgba(0,0,0,0.05)]"
+        className={`fixed right-0 top-0 h-full bg-white border-l-2 border-black z-[150] flex flex-col shadow-[-4px_0_20px_rgba(0,0,0,0.1)] transition-transform duration-300 ease-in-out ${
+          isMobile 
+            ? `w-full max-w-sm ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}` 
+            : 'w-56 md:w-64 translate-x-0'
+        }`}
         role="complementary"
         aria-label="Control Panel"
       >
         {/* Header */}
-        <header className="p-4 md:p-6 border-b border-gray-200">
-          <h1 className="text-sm md:text-base font-semibold text-black tracking-tight">
-            {t('app.title')}
-          </h1>
+        <header className="p-4 sm:p-5 md:p-6 border-b border-gray-200 flex-shrink-0">
+          <div className="flex items-center justify-between mb-3">
+            <h1 className="text-base sm:text-lg md:text-xl font-semibold text-black tracking-tight">
+              {t('app.title')}
+            </h1>
+            {isMobile && (
+              <button
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="p-1 text-gray-500 hover:text-black transition-colors"
+                aria-label="Close menu"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
           
           {/* Language Selector */}
-          <nav aria-label="Language selection" className="flex gap-2 mt-3">
+          <nav aria-label="Language selection" className="flex gap-2">
             <button
               onClick={() => changeLanguage('es')}
               aria-label="Cambiar idioma a Español"
               aria-pressed={i18n.language === 'es'}
-              className={`px-2 py-1 text-[10px] font-medium uppercase tracking-wider transition-all ${
+              className={`px-3 py-1.5 text-xs sm:text-sm font-medium uppercase tracking-wider transition-all rounded ${
                 i18n.language === 'es'
                   ? 'bg-black text-white'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -215,7 +297,7 @@ function App() {
               onClick={() => changeLanguage('en')}
               aria-label="Change language to English"
               aria-pressed={i18n.language === 'en'}
-              className={`px-2 py-1 text-[10px] font-medium uppercase tracking-wider transition-all ${
+              className={`px-3 py-1.5 text-xs sm:text-sm font-medium uppercase tracking-wider transition-all rounded ${
                 i18n.language === 'en'
                   ? 'bg-black text-white'
                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -227,10 +309,10 @@ function App() {
         </header>
         
         {/* Controls */}
-        <section className="flex-1 p-4 md:p-6 flex flex-col gap-3 overflow-y-auto" aria-label="Image controls">
+        <section className="flex-1 p-4 sm:p-5 md:p-6 flex flex-col gap-3 sm:gap-4 overflow-y-auto" aria-label="Image controls">
           {isProcessing ? (
             <div 
-              className="px-3 py-2 text-center text-gray-500 text-[10px] md:text-xs font-medium uppercase tracking-wider border border-gray-300 bg-gray-50"
+              className="px-4 py-3 text-center text-gray-500 text-xs sm:text-sm font-medium uppercase tracking-wider border border-gray-300 bg-gray-50 rounded"
               role="status"
               aria-live="polite"
             >
@@ -240,7 +322,7 @@ function App() {
             <>
               <label 
                 htmlFor="image-input" 
-                className="px-3 py-2 text-[10px] md:text-xs font-medium text-center cursor-pointer transition-all duration-200 border-2 border-black bg-black text-white uppercase tracking-wider hover:bg-white hover:text-black active:scale-95"
+                className="px-4 py-3 sm:py-3.5 text-xs sm:text-sm font-medium text-center cursor-pointer transition-all duration-200 border-2 border-black bg-black text-white uppercase tracking-wider hover:bg-white hover:text-black active:scale-95 rounded"
               >
                 {t('buttons.loadImage')}
               </label>
@@ -259,7 +341,7 @@ function App() {
             <button 
               onClick={handleReset}
               aria-label="Restore default image"
-              className="px-3 py-2 text-[10px] md:text-xs font-medium text-center cursor-pointer transition-all duration-200 border border-gray-300 bg-white text-black uppercase tracking-wider hover:bg-gray-50 hover:border-black active:scale-95"
+              className="px-4 py-3 sm:py-3.5 text-xs sm:text-sm font-medium text-center cursor-pointer transition-all duration-200 border border-gray-300 bg-white text-black uppercase tracking-wider hover:bg-gray-50 hover:border-black active:scale-95 rounded"
             >
               {t('buttons.restore')}
             </button>
@@ -268,18 +350,22 @@ function App() {
           <button 
             onClick={handleDownloadMockup}
             aria-label="Download mockup as PNG"
-            className="px-3 py-2 text-[10px] md:text-xs font-semibold text-center cursor-pointer transition-all duration-200 border-2 border-black bg-black text-white uppercase tracking-wider hover:bg-white hover:text-black active:scale-95"
+            className="px-4 py-3 sm:py-3.5 text-xs sm:text-sm font-semibold text-center cursor-pointer transition-all duration-200 border-2 border-black bg-black text-white uppercase tracking-wider hover:bg-white hover:text-black active:scale-95 rounded"
           >
             {t('buttons.download')}
           </button>
           
-          {/* Info - Solo visible en desktop */}
-          <footer className="hidden md:block mt-auto pt-4 border-t border-gray-200">
-            <p className="text-[10px] text-gray-500 leading-relaxed">
-              <strong className="font-medium text-black block mb-1">{t('controls.title')}</strong>
-              {t('controls.rotate')}<br/>
-              {t('controls.move')}<br/>
-              {t('controls.zoom')}
+          {/* Info - Visible en todas las pantallas pero más compacto en móvil */}
+          <footer className="mt-auto pt-4 sm:pt-6 border-t border-gray-200">
+            <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
+              <strong className="font-medium text-black block mb-2">{t('controls.title')}</strong>
+              <span className="block mb-1">{t('controls.rotate')}</span>
+              {!isMobile && (
+                <>
+                  <span className="block mb-1">{t('controls.move')}</span>
+                </>
+              )}
+              <span className="block">{t('controls.zoom')}</span>
             </p>
           </footer>
         </section>
